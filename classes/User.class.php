@@ -1,10 +1,34 @@
 <?php
+/**
+ * User class.
+ */
 class User
 {
+	/**
+	 * id
+	 * The user's identifier
+	 * (default value: 1)
+	 * @var int
+	 * @access public
+	 */
 	public $id = 1;
+	
 	public $username;
+	
+	/**
+	 * registered
+	 * The user's registration date
+	 * @var mixed
+	 * @access public
+	 */
 	public $registered;
 	
+	/**
+	 * db
+	 * Database handle
+	 * @var mixed
+	 * @access private
+	 */
 	private $db;
 	
 	public function __construct()
@@ -38,9 +62,14 @@ class User
 		}
 	}
 	
+	public function getId()
+	{
+		return $this->id;
+	}
+	
 	public function setId($i)
 	{
-		if(is_int($i))
+		if(is_int($i) or is_numeric($i))
 		{
 			$this->id = $i;
 		}
