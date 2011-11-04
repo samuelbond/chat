@@ -40,7 +40,7 @@ class User
 	
 	public function setId($i)
 	{
-		if(is_int($i)
+		if(is_int($i))
 		{
 			$this->id = $i;
 		}
