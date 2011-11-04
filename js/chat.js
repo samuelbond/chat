@@ -8,6 +8,7 @@ $(document).ready(function(){
 	});
 	
 	$('a[href="/channels"]').click(function(){
+		$('header form').slideUp();
 		$(this).next('ul').slideToggle();
 		return false;
 	});
