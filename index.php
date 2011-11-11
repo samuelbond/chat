@@ -28,6 +28,7 @@ if($page == 'home' or
 	$page == 'channel' and isset($id))
 {
 	$file = 'channel';
+	$title = $id;
 	
 	if(isset($id))
 		$c->setChan($id);
@@ -38,27 +39,26 @@ elseif($page == 'message'
 	and is_numeric($id))
 {
 	$file = 'message';
+	$title = 'Message #'.$id;
 	$message = $c->getMessage($id);
 }
 elseif($page == 'user'
 	and isset($id))
 {
 	$file = 'profile';
+	$title = $id;
 	$profile = $c->getUser($id);
 	
 }
 elseif(in_array($page, $stuff) and $id == null)
 {
 	$file = $page;
+	$title = ucfirst($page);
 }
 
 $channel = $c->getChan();
 
 ////////////////
-/*
- - Channel
- - Message
- */
 
 include('layout/header.php');
 include('layout/' . $file . '.php');

@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>Chat</title>
+		<title>Chat<?php if(isset($title)) echo ' | '.$title; ?></title>
 		<base href="<?php echo SITE_URL; ?>" />
 		
 		<link rel="stylesheet" href="/css/reset.css" />
