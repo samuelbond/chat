@@ -11,9 +11,17 @@ class User
 	 * @var int
 	 * @access public
 	 */
-	public $id = 1;
+	protected $user_id = 1;
 	
-	public $username;
+	/**
+	 * username
+	 * 
+	 * (default value: 'anonymous_coward')
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $username = 'anonymous_coward';
 	
 	/**
 	 * registered
@@ -21,27 +29,12 @@ class User
 	 * @var mixed
 	 * @access public
 	 */
-	public $registered;
+	protected $registered;
 	
-	/**
-	 * db
-	 * Database handle
-	 * @var mixed
-	 * @access private
-	 */
-	private $db;
+	protected $loggedin = false;
 	
 	public function __construct()
 	{
-		$this->db = new Database;
-		$this->username = 'anonymous_coward';
-	}
-	
-	private function verify($password)
-	{
-		if(!is_string($this->username))
-			$pass = Chat::sanitize($password);
-		
 		
 	}
 	
@@ -64,19 +57,62 @@ class User
 	
 	public function getId()
 	{
-		return $this->id;
+		return $this->user_id;
 	}
 	
 	public function setId($i)
 	{
 		if(is_int($i) or is_numeric($i))
 		{
-			$this->id = $i;
+			$this->user_id = $i;
 		}
 		else
 		{
 			return false;
 		}
+	}
+	
+	public function loggedIn()
+	{
+		return $this->loggedin;
+	}
+	
+	public function setLoggedIn($l)
+	{
+		if($l == true)
+		{
+			$this->loggedin = true;
+		}
+		else
+		{
+			$this->loggedin = false;
+		}
+	}
+	
+	/**
+	 * getArray function.
+	 * Return user info as an associative array.
+	 * @access public
+	 * @return void
+	 */
+	public function getArray()
+	{
+		return array(
+			'user_id' => $this->getId(),
+			'username' => $this->getUsername(),
+			'registered' => $this->registered,
+			'loggedin' => $this->loggedin
+		);
+	}
+	
+	public function __get($p)
+	{
+		return $this->$p;
+	}
+	
+	public function __set($p, $v)
+	{
+		$this->$p = $v;
 	}
 	
 	public function __clone()

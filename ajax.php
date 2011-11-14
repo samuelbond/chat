@@ -1,4 +1,8 @@
 <?php
+/*
+ * index.php
+ */
+
 require_once('init.php');
 
 if($added === false)
@@ -11,5 +15,10 @@ if(isset($output))
 
 if($added === null)
 {
-	echo json_encode($c->getMessages(10));
+	if(isset($_GET['channel']))
+		$msgs = $c->getMessages(12, $_GET['channel']);
+	else
+		$msgs = $c->getMessages(12);
+	
+	echo json_encode($msgs);
 }

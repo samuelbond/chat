@@ -3,10 +3,8 @@
  * Chat class.
  */
 class Chat
-{
-	private $channel;
-	private $channel_id = 1;
-	
+{	
+	private $chan;
 	private $user;
 	
 	/**
@@ -27,8 +25,13 @@ class Chat
 	{
 		$this->db = new Database;
 		$this->user = new User;
+		$this->chan = new Channel(DEFAULT_CHAN);
 		
-		$this->channel = DEFAULT_CHAN;
+		if(isset($_SESSION['user']) and 
+			$_SESSION['user'] instanceof User)
+		{
+			$this->user = $_SESSION['user'];
+		}
 	}
 	
 	/**
@@ -38,18 +41,26 @@ class Chat
 	 * @param int $amount (default: 40)
 	 * @return array
 	 */
-	public function getMessages($amount = 40)
+	public function getMessages($amount = 40, $channel = null)
 	{
-		$chan = $this->db->quote( $this->getChan() );
+		if(is_string($channel))
+			$channel = self::sanitize($channel);
+		else
+			$channel = $this->chan->getName();
+		
 		$sql = 'SELECT message_id,posted,content,users.username,channels.name
 				FROM messages 
 				INNER JOIN channels ON messages.channel = channels.channel_id 
 				LEFT JOIN users ON messages.owner = users.user_id 
-				WHERE name='.$chan.'
-				ORDER BY posted DESC LIMIT ' . $amount;
+				WHERE channels.name = :chan
+				ORDER BY message_id DESC LIMIT :amount ';
 		
-		$statement = $this->db->query($sql);
-		$output = $statement->fetchAll(PDO::FETCH_ASSOC);
+		$st = $this->db->prepare($sql);
+		$st->bindValue(':chan', $channel);
+		$st->bindParam(':amount', $amount, PDO::PARAM_INT);
+		
+		$st->execute();
+		$output = $st->fetchAll(PDO::FETCH_ASSOC);
 		
 		return array_reverse($output);
 	}
@@ -73,20 +84,28 @@ class Chat
 		
 		$msg = $this->sanitize($msg);
 		
-		$sql = 'INSERT INTO messages (content, channel, ip)
-				VALUES (:msg, :chan, :ip)';
+		if(is_null($this->chan->getId()))
+			$this->fetchChan($this->chan->getName());
+		
+		$sql = 'INSERT INTO messages ( content, channel, ip, owner )
+				VALUES ( :msg, :chan, :ip, :owner )';
+		
 		$st = $this->db->prepare($sql);
 		$st->bindParam(':msg', $msg);
-		$st->bindParam(':chan', $this->channel_id);
+		$st->bindValue(':chan', $this->chan->getId());
 		$st->bindParam(':ip', $_SERVER['REMOTE_ADDR']);
+		$st->bindValue(':owner', $this->user->getId());
 		
 		if($st->execute())
 		{
-			// If the query succeeded, return the formatted message
-			$message = '['.date('Y-m-d H:i:s').'] <em>'.
-						$this->user->getUsername().
-						'</em>: '.$msg;
-			return $message;
+			// If the query succeeded, return the message data
+			return array(
+				//'message_id' => 0,
+				'posted' => date('Y-m-d H:i:s'),
+				'content' => $msg,
+				'username' => $this->user->getUsername(),
+				'name' => $this->getChan()
+			);
 		}
 		else
 		{
@@ -104,7 +123,8 @@ class Chat
 	public function getMessage($id)
 	{
 		$sql = 'SELECT message_id,posted,content
-				FROM messages WHERE message_id=:mid LIMIT 1';
+				FROM messages WHERE message_id = :mid LIMIT 1';
+		
 		$st = $this->db->prepare($sql);
 		$st->bindParam(':mid', $id);
 		
@@ -133,6 +153,14 @@ class Chat
 		return $output;
 	}
 	
+	/**
+	 * parseURL function.
+	 * Parses a URL and returns its pieces.
+	 * @access public
+	 * @static
+	 * @param mixed $u
+	 * @return void
+	 */
 	public static function parseURL($u)
 	{
 		$seq = explode('/', $u);
@@ -142,28 +170,122 @@ class Chat
 	}
 	
 	/**
-	 * getUser function.
+	 * fetchUser function.
 	 * Get a user by their username
 	 * @access public
 	 * @param mixed $username
-	 * @return void
+	 * @return mixed
 	 */
-	public function getUser($username)
+	public function fetchUser($username)
 	{
 		$sql = 'SELECT user_id,username,registered
-				FROM users WHERE username=:un LIMIT 1';
+				FROM users WHERE username = :un LIMIT 1';
 		
 		$st = $this->db->prepare($sql);
-		$username = $this->sanitize($username);
-		
-		$st->bindParam(':un', $username);
+		$st->bindValue(':un', self::sanitize($username));
 		$st->setFetchMode(PDO::FETCH_INTO, $this->user);
 		
 		if($st->execute())
 		{
+			return $this->user;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	public function getUser()
+	{
+		return $this->user;
+	}
+	
+	/**
+	 * addUser function.
+	 * Adds a user to the database.
+	 * @access public
+	 * @param mixed $username
+	 * @param mixed $password
+	 * @return mixed
+	 */
+	public function addUser($username, $password)
+	{
+		$sql = 'INSERT INTO users ( username, password )
+				VALUES ( :un, :pw )';
+		
+		$st = $this->db->prepare($sql);
+		$st->bindValue(':un', self::sanitize($username));
+		$st->bindValue(':pw', sha1($password));
+		
+		
+		if($st->execute())
+		{
+			return $this->fetchUser(self::sanitize($username));
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	/**
+	 * loginUser function.
+	 * Logs a user in.
+	 * @access public
+	 * @param mixed $username
+	 * @param mixed $password
+	 * @return bool
+	 */
+	public function loginUser($username, $password)
+	{
+		$sql = 'SELECT user_id,username,registered FROM users WHERE username = :un AND password = :pw';
+		$st = $this->db->prepare($sql);
+		$st->bindValue(':un', self::sanitize($username));
+		$st->bindValue(':pw', sha1($password));
+		$st->setFetchMode(PDO::FETCH_INTO, $this->user);
+		
+		if($st->execute() and $st->fetch())
+		{
+			$this->user->setLoggedIn(true);
+			$_SESSION['user'] = $this->getUser();
 			return true;
-			echo 'haaaai';
-			var_dump($this->user);
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	/**
+	 * logoutUser function.
+	 * Logs the current user out.
+	 * @access public
+	 * @return void
+	 */
+	public function logoutUser()
+	{
+		$this->user = new User;
+		session_destroy();
+	}
+	
+	/**
+	 * deleteUser function.
+	 * Deletes a user from the database;
+	 * @access public
+	 * @param mixed $username
+	 * @return bool
+	 */
+	public function deleteUser($username)
+	{
+		$sql = 'DELETE FROM user
+				WHERE username = :un LIMIT 1';
+		
+		$st = $this->db->prepare($sql);
+		$st->bindValue(':un', self::sanitize($username));
+		
+		if($st->execute())
+		{
+			return true;
 		}
 		else
 		{
@@ -197,6 +319,26 @@ class Chat
 		}
 	}
 	
+	protected function fetchChan($name)
+	{
+		$sql = 'SELECT channel_id, name, created
+				FROM channels WHERE name = :cn';
+		
+		$st = $this->db->prepare($sql);
+		$st->bindValue(':cn', self::sanitize($name));
+		$st->setFetchMode(PDO::FETCH_INTO, $this->chan);
+		
+		if($st->execute() and $st->fetch())
+		{
+			$_SESSION['chan'] = $this->chan;
+			return $this->chan;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
 	/**
 	 * getChan function.
 	 * Get the current channel
@@ -205,7 +347,7 @@ class Chat
 	 */
 	public function getChan()
 	{
-		return $this->channel;
+		return $this->chan;
 	}
 	
 	/**
@@ -219,7 +361,8 @@ class Chat
 	{
 		if(is_string($channame))
 		{
-			$this->channel = $channame;
+			$this->chan->setName($channame);
+			return true;
 		}
 		else
 		{

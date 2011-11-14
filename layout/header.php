@@ -2,7 +2,7 @@
 
 <html>
 	<head>
-		<meta charset="utf-8" />
+		<meta charset="<?php echo CHARSET; ?>" />
 		<title>Chat<?php if(isset($title)) echo ' | '.$title; ?></title>
 		<base href="<?php echo SITE_URL; ?>" />
 		
@@ -17,24 +17,20 @@
 	<body>
 		<header>
 			<h1><a href="/">Chat</a></h1>
-			<h2>~<a href="/channel/<?php echo $channel; ?>"><?php echo $channel; ?></a></h2>
+			<h2>In <a href="/channel/<?php echo $channel->getName(); ?>"><?php echo $channel->getName(); ?></a> as ~<a href="/user/<?php echo $user->getUsername(); ?>"><?php echo $user->getUsername(); ?></a></h2>
 			
 			<nav>
 				<ul>
+					<?php if($user->loggedIn()): ?>
+					<li><a href="/logout">Log out</a></li>
+					<?php else: ?>
 					<li><a href="/login">Log in</a>
-						<form method="post" action="/login">
-							<input type="text" name="username" placeholder="Username" />
-							<input type="password" name="password" placeholder="Password" />
-							<input type="submit" value="Log in" />
-						</form>
+						<?php include('loginform.php'); ?>
 					</li>
 					<li><a href="/register">Register</a>
-						<form method="post" action="/register">
-							<input type="text" name="username" placeholder="Username" />
-							<input type="password" name="password" placeholder="Password" />
-							<input type="submit" value="Register" />
-						</form>
+						<?php include('registerform.php'); ?>
 					</li>
+					<?php endif; ?>
 				
 					<li><a href="/channels">Channels</a>
 						<ul>

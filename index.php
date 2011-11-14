@@ -1,13 +1,18 @@
 <?php
+/*
+ * index.php
+ */
+
 require_once('init.php');
 
-session_start();
+header('Content-Type: text/html; charset='.CHARSET);
 
 ////////////////
 
 $seq = Chat::parseURL($_SERVER['REQUEST_URI']);
 $stuff = array('register', 'login', 'logout', 'logs', 'channels', 'faq');
 
+// Check the URL parameters
 if(isset($seq[1]) and isset($seq[2]))
 {
 	$page = $seq[1];
@@ -31,9 +36,14 @@ if($page == 'home' or
 	$title = $id;
 	
 	if(isset($id))
+	{
 		$c->setChan($id);
-	
-	$messages = $c->getMessages(20);
+		$messages = $c->getMessages(40, $id);
+	}
+	else
+	{
+		$messages = $c->getMessages(40);
+	}
 }
 elseif($page == 'message'
 	and is_numeric($id))
@@ -50,6 +60,27 @@ elseif($page == 'user'
 	$profile = $c->getUser($id);
 	
 }
+elseif($page == 'login' and
+		!empty($_POST['username']) and !empty($_POST['password']))
+{
+	$file = 'login';
+	$c->loginUser($_POST['username'], $_POST['password']);
+}
+elseif($page == 'logout')
+{
+	$file = 'logout';
+	$c->logoutUser();
+}
+elseif($page == 'register' and
+		!empty($_POST['username']) and !empty($_POST['password']))
+{
+	$file = 'register';
+	
+	if( $c->addUser($_POST['username'], $_POST['password']) )
+		$content = 'Succes, you are registered.';
+	else
+		$content = 'Something went wrong, you aren\'t registered.';
+}
 elseif(in_array($page, $stuff) and $id == null)
 {
 	$file = $page;
@@ -57,6 +88,7 @@ elseif(in_array($page, $stuff) and $id == null)
 }
 
 $channel = $c->getChan();
+$user = $c->getUser();
 
 ////////////////
 

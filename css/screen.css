@@ -96,6 +96,7 @@ header a {
 #messagebox input[type=text] {
 	border: none;
 	width: 91%;
+	height: 26px;
 }
 
 #messagebox input:focus {
@@ -107,4 +108,6 @@ header a {
 	border: 1px solid;
 	background-color: #fff;
 	float: right;
+	margin: 2px;
+	height: 24px;
 }
