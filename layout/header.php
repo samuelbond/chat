@@ -17,7 +17,7 @@
 	<body>
 		<header>
 			<h1><a href="/">Chat</a></h1>
-			<h2>In <a href="/channel/<?php echo $channel->getName(); ?>"><?php echo $channel->getName(); ?></a> as ~<a href="/user/<?php echo $user->getUsername(); ?>"><?php echo $user->getUsername(); ?></a></h2>
+			<h2>in <a href="/channel/<?php echo $channel->getName(); ?>"><?php echo $channel->getName(); ?></a> as ~<a href="/user/<?php echo $user->getUsername(); ?>"><?php echo $user->getUsername(); ?></a></h2>
 			
 			<nav>
 				<ul>

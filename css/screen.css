@@ -9,14 +9,24 @@ body {
 	color: #000;
 }
 
+/* Generic stuff */
 a {
-	text-decoration: none;
 	color: inherit;
+	text-decoration: none;
+}
+
+img {
+	max-width: 50%;
+	border: none;
 }
 
 em {
 	font-size: 80%;
 	font-style: italic;
+}
+
+ul,ol {
+	list-style: inside;
 }
 
 h1,h2,nav {
@@ -28,21 +38,23 @@ h1 {
 	font-size: 18px;
 }
 
-header,#messagebox {
+#content,#chat {
+	padding: 32px 8px;
+	font-family: "Courier New", Courier, Monaco, monospace;
+}
+
+/* Header */
+header,
+#messagebox {
 	position: fixed;
 	height: 24px;
 	width: 100%;
-	
 	background-color: #fff;
 }
 
 header {
 	border-bottom: 1px solid;
-}
-
-header ul ul {
-	
-	
+	padding: 2px;
 }
 
 header ul ul,
@@ -69,20 +81,26 @@ header a {
 	color: #2b9351;
 }
 
-#chat {
-	padding: 32px 8px;
-	font-family: "Courier New", Courier, Monaco, monospace;;
+/* Content */
+#content p,
+#content ul {
+	margin: 8px 0;
+}
+
+#content a {
+	text-decoration: underline;
+}
+
+/* Chat */
+#chat a {
+	color: #757777;
 }
 
 #chat p {
 	border-bottom: 1px solid #c5c5c5;
 	padding: 2px 0px;
 }
-
-#chat p:first-child {
-	border-top: 1px solid #c5c5c5;
-}
-
+	/* Message box */
 #messagebox {
 	bottom: 0px;
 	border-top: 1px solid;
@@ -104,7 +122,6 @@ header a {
 }
 
 #messagebox input[type=submit] {
-	/*display: none;*/
 	border: 1px solid;
 	background-color: #fff;
 	float: right;
