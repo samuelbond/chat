@@ -22,7 +22,14 @@ class Channel
 	
 	public function getId()
 	{
-		return $this->channel_id;
+		if(!is_null($this->channel_id))
+		{
+			return $this->channel_id;
+		}
+		else
+		{
+			return false;
+		}
 	}
 	
 	public function setId($id)
