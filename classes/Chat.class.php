@@ -149,10 +149,10 @@ class Chat
 	{
 		include('includes/functions.inc.php');
 		
-		$allowed_funcs = array('image', 'uname', 'name', 'time' => 'servertime', 'pug', 'pugbomb', 'rev', 'rot13', 'md5', 'sha1', 'l33t');
+		$allowed_funcs = array('image', 'uname', 'name', 'pug', 'pugbomb', 'rev', 'rot13', 'md5', 'sha1', 'l33t');
 		
 		
-		if(array_key_exists($fu, $allowed_funcs) and function_exists($fu))
+		if(in_array($fu, $allowed_funcs) and function_exists($fu))
 			return call_user_func($fu, $ar);
 		else
 			return false;
