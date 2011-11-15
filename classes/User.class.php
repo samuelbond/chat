@@ -72,6 +72,11 @@ class User
 		}
 	}
 	
+	public function getJoinDate()
+	{
+		return $this->registered;
+	}
+	
 	public function loggedIn()
 	{
 		return $this->loggedin;
