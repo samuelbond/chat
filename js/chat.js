@@ -91,9 +91,10 @@ $(document).ready(function(){
 
 				$('#chat').append(formatMessage(message));
 				$('#chat .new').slideDown();
-				$(input).val('');
+				
 			}
 		);
+		$(input).val('');
 	});
 	////////////////
 	
