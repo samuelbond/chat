@@ -72,19 +72,29 @@ class Chat
 	 * @param string $msg
 	 * @return bool
 	 */
-	public function addMessage($msg)
+	public function addMessage($msg, $user = null)
 	{
 		// Refuse a message when it's empty
 		if(is_null($msg) or empty($msg))
 			return false;
 		
 		// Refuse a message when it's over 140 chars
-		if(strlen($msg) > 140)
+		if(strlen($msg) > 240)
 			return false;
 		
 		$msg = $this->sanitize($msg);
 		
-		if(is_null($this->chan->getId()))
+		if(is_null($user))
+			$user_id = $this->user->getId();
+		elseif(is_int($user))
+			$user_id = $user;
+		elseif(is_string($user))
+		{
+			$u = $this->fetchUser($user);
+			$user_id = $u->getId();
+		}
+		
+		if(!$this->chan->getId())
 			$this->fetchChan($this->chan->getName());
 		
 		$sql = 'INSERT INTO messages ( content, channel, ip, owner )
@@ -94,7 +104,21 @@ class Chat
 		$st->bindParam(':msg', $msg);
 		$st->bindValue(':chan', $this->chan->getId());
 		$st->bindParam(':ip', $_SERVER['REMOTE_ADDR']);
-		$st->bindValue(':owner', $this->user->getId());
+		$st->bindParam(':owner', $user_id);
+		
+		$pattern = '/^\/\w{2,16}(\s?)/';
+		if(preg_match($pattern, $msg, $match))
+		{
+			$function = substr(trim($match[0]), 1);
+			$argument = trim(preg_filter($pattern, '', $msg));
+			
+			if($output = $this->executeFunction($function, $argument))
+				$msg = $output;
+		}
+		else
+		{
+			$msg = self::wrapUrls($msg);
+		}
 		
 		if($st->execute())
 		{
@@ -111,6 +135,47 @@ class Chat
 		{
 			return false;
 		}
+	}
+	
+	/**
+	 * executeFunction function.
+	 * Executes a /command from the function list.
+	 * @access protected
+	 * @param string $fu
+	 * @param mixed $ar
+	 * @return mixed
+	 */
+	protected function executeFunction($fu, $ar)
+	{
+		include('includes/functions.inc.php');
+		
+		$allowed_funcs = array('image', 'uname', 'name', 'time' => 'servertime', 'pug', 'pugbomb', 'rev', 'rot13', 'md5', 'sha1', 'l33t');
+		
+		
+		if(array_key_exists($fu, $allowed_funcs) and function_exists($fu))
+			return call_user_func($fu, $ar);
+		else
+			return false;
+	}
+	
+	/**
+	 * wrapUrls function.
+	 * Identifies URLs in arbitraty strings and wraps them with <a> tags.
+	 * @access public
+	 * @static
+	 * @param string $text
+	 * @return string
+	 */
+	public static function wrapUrls($text)
+	{
+		// Crazy-ass regex from Gruber {@link http://daringfireball.net/2010/07/improved_regex_for_matching_urls}
+		$pattern = '~(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))~';
+		
+		$output = preg_replace_callback($pattern, function($matches){
+			return '<a href="'.$matches[0].'">'.$matches[0].'</a>';
+		}, $text);
+		
+		return $output;
 	}
 	
 	/**
@@ -183,11 +248,11 @@ class Chat
 		
 		$st = $this->db->prepare($sql);
 		$st->bindValue(':un', self::sanitize($username));
-		$st->setFetchMode(PDO::FETCH_INTO, $this->user);
+		$st->setFetchMode(PDO::FETCH_CLASS, 'User');
 		
-		if($st->execute())
+		if($st->execute() and $user = $st->fetch())
 		{
-			return $this->user;
+			return $user;
 		}
 		else
 		{
@@ -218,9 +283,10 @@ class Chat
 		$st->bindValue(':pw', sha1($password));
 		
 		
-		if($st->execute())
+		if($st->execute() and $user = $this->fetchUser($username))
 		{
-			return $this->fetchUser(self::sanitize($username));
+			$this->user = $user;
+			return $user;
 		}
 		else
 		{
@@ -248,6 +314,7 @@ class Chat
 		{
 			$this->user->setLoggedIn(true);
 			$_SESSION['user'] = $this->getUser();
+			$this->addMessage($this->user->getUsername().' logged in.', 0);
 			return true;
 		}
 		else
@@ -264,6 +331,7 @@ class Chat
 	 */
 	public function logoutUser()
 	{
+		$this->addMessage($this->user->getUsername().' logged out.', 0);
 		$this->user = new User;
 		session_destroy();
 	}

@@ -96,6 +96,13 @@ header a {
 	color: #757777;
 }
 
+#chat a[href*='/user/server'] {
+	color: #fff;
+	background-color: red;
+	padding: 2px 6px;
+	border-radius: 2px;
+}
+
 #chat p {
 	border-bottom: 1px solid #c5c5c5;
 	padding: 2px 0px;
