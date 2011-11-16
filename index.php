@@ -64,7 +64,10 @@ elseif($page == 'login' and
 		!empty($_POST['username']) and !empty($_POST['password']))
 {
 	$file = 'login';
-	$c->loginUser($_POST['username'], $_POST['password']);
+	if($c->loginUser($_POST['username'], $_POST['password']))
+		$message = 'You have logged in!';
+	else
+		$message = 'Login failed, are you username and password correct?';
 }
 elseif($page == 'logout')
 {
@@ -80,9 +83,9 @@ elseif($page == 'register' and
 	$file = 'register';
 	
 	if( $c->addUser($_POST['username'], $_POST['password']) )
-		$content = 'Succes, you are registered.';
+		$message = 'Succes, you are registered.';
 	else
-		$content = 'Something went wrong, you aren\'t registered.';
+		$message = 'Something went wrong, you aren\'t registered. Perhaps that username is already occupied?';
 }
 elseif(in_array($page, $stuff) and $id == null)
 {

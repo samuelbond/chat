@@ -10,7 +10,9 @@
 <ul>
 	<li>String functions: /rev, /rot13</li>
 	<li>Cryptographic functions: /md5, /sha1</li>
-	<li>Status functions: /uname</li>
+	<li>Server status functions: /uptime, /uname</li>
+	
+	<li>Other functions: /image, /pug</li>
 </ul>
 <p>If you'd like to see additional functions, request them to an operator.</p>
 
