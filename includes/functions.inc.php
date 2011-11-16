@@ -29,15 +29,15 @@ function rot13($str)
 	return str_rot13($str);
 }
 
+/**
+ * name function.
+ * Gives a message on how to get a different nickname.
+ * @access public
+ * @return string
+ */
 function name()
 {
 	return 'Go <a href="/register">register a nickname/password combo</a>, at least, if you want to.';
-}
-
-function me($msg, $user)
-{
-	return false;
-	//return '* '.$user.' '.$msg;
 }
 
 /**
@@ -49,6 +49,20 @@ function me($msg, $user)
 function uname()
 {
 	return `uname -a`;
+}
+
+function sun($when)
+{
+	if(empty($when))
+		$when = 'tomorrow';
+	
+	$when = strtotime($when);
+	$lat = 52.22;
+	$long = 4.53;
+	
+	$sunrise = date_sunrise($when, SUNFUNCS_RET_STRING, $lat, $long, 90, 1);
+	$sunset = date_sunset($when, SUNFUNCS_RET_STRING, $lat, $long, 90, 1);
+	return 'Amsterdam, '.strftime('%d %B %Y', $when).', sunrise at: '.$sunrise.', sunset at: '.$sunset.'.';
 }
 
 /**
@@ -67,7 +81,7 @@ function image($term)
 	$data = json_decode(file_get_contents($res));
 	
 	$img = $data->responseData->results[ mt_rand(0,7) ];
-	var_dump($img);
+	
 	$html = 'Image search for "'.$term.'": <a href="'.$img->originalContextUrl.'"><img src="'.$img->unescapedUrl.'" title="'.$img->titleNoFormatting.'" alt="'.$img->titleNoFormatting.'" /></a>';
 	
 	return $html;
@@ -82,6 +96,8 @@ function youtube($term)
 	$data = json_decode(file_get_contents($res));
 	$videos = $data->feed->entry;
 	$video = $videos[ mt_rand(0,7) ];
+	
+	// This is ugly
 	if(empty($video))
 		return 'Youtube search for "'.$term.'" didn\'t return any videos.';
 	
@@ -97,6 +113,22 @@ function youtube($term)
 	
 	return 'Youtube search for "'.$term.'": '.
 			'<iframe width="560" height="315" src="http://www.youtube.com/embed/'.$code.'" frameborder="0" allowfullscreen></iframe>';
+}
+
+/**
+ * xkcd function.
+ * Get an xkcd comic by its number.
+ * @access public
+ * @param mixed $num
+ * @return string
+ */
+function xkcd($num)
+{
+	$c = json_decode(file_get_contents('http://xkcd.com/'.urlencode($num).'/info.0.json'));
+	if(is_null($c))
+		return 'xkcd: comic "'.$num.'" not found.';
+	
+	return '<a href="http://xkcd.com/'.$c->num.'"><img src="'.$c->img.'" alt="'.$c->alt.'" /></a>';
 }
 
 function l33t($text)
@@ -136,11 +168,23 @@ function l33t($text)
 	return $text;
 }
 
+/**
+ * uptime function.
+ * Returns server uptime and load averages.
+ * @access public
+ * @return string
+ */
 function uptime()
 {
 	return `uptime`;
 }
 
+/**
+ * servertime function.
+ * Returns RFC 2822 formatted server time.
+ * @access public
+ * @return string
+ */
 function servertime()
 {
 	return date('r');
@@ -148,7 +192,7 @@ function servertime()
 
 /**
  * pug function.
- * Get a pug.
+ * Gets a pug.
  * @access public
  * @return pug
  */
@@ -161,7 +205,7 @@ function pug()
 
 /**
  * pugbomb function.
- * Throw a pug bomb.
+ * Throws a pug bomb.
  * @access public
  * @param int $count
  * @return pugs

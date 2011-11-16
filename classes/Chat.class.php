@@ -23,15 +23,20 @@ class Chat
 	 */
 	public function __construct()
 	{
+		// Set up some properties
 		$this->db = new Database;
 		$this->user = new User;
 		$this->chan = new Channel(DEFAULT_CHAN);
 		
+		// Check if a user is set in the current session
 		if(isset($_SESSION['user']) and 
 			$_SESSION['user'] instanceof User)
 		{
 			$this->user = $_SESSION['user'];
 		}
+		// Check if the rate limit is set
+		//if(!isset($_SESSION['rate_limit']))
+		//	$_SESSION['rate_limit'] = RATE_LIMIT;
 	}
 	
 	/**
@@ -149,8 +154,7 @@ class Chat
 	{
 		include('includes/functions.inc.php');
 		
-		$allowed_funcs = array('image', 'youtube', 'name', 'pug', 'pugbomb', 'rev', 'rot13', 'md5', 'sha1', 'uname', 'uptime', 'l33t');
-		
+		$allowed_funcs = array('image', 'youtube', 'name', 'pug', 'pugbomb', 'rev', 'rot13', 'md5', 'sha1', 'sun', 'uname', 'uptime', 'xkcd', 'l33t');
 		
 		if(in_array($fu, $allowed_funcs) and function_exists($fu))
 			return call_user_func($fu, $ar);
