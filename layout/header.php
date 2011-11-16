@@ -9,7 +9,7 @@
 		<link rel="stylesheet" href="/css/reset.css" />
 		<link rel="stylesheet" href="/css/screen.css" media="screen" />
 		
-		<script src="/js/jquery-1.6.4.min.js"></script>
+		<script src="/js/jquery-1.7.min.js"></script>
 		<script src="/js/jquery.scrollTo-1.4.2-min.js"></script>
 		<script src="/js/chat.js"></script>
 		
