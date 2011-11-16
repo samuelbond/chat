@@ -157,13 +157,13 @@ function l33t($text)
 		'u'	=>	'|_|',
 		'v'	=>	'\/',
 		'w'	=>	'\/\/',
-		'x'	=>	'><',
+		'x'	=>	')(',
 		'y'	=>	'`/',
 		'z'	=>	'~/_'
 	);
 	foreach($letters as $letter => $l33t)
 	{
-		$text = str_replace($letter, $l33t, $text);
+		$text = str_ireplace($letter, $l33t, $text);
 	}
 	return $text;
 }
