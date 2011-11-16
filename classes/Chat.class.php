@@ -217,9 +217,7 @@ class Chat
 	 */
 	public static function sanitize($input)
 	{
-		$output = htmlentities($input);
-		
-		return $output;
+		return htmlentities($input, ENT_QUOTES | ENT_HTML5, CHARSET);
 	}
 	
 	/**
