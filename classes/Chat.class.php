@@ -82,7 +82,7 @@ class Chat
 		if(strlen($msg) > 240)
 			return false;
 		
-		$msg = $this->sanitize($msg);
+		$msg = self::sanitize($msg);
 		
 		if(is_null($user))
 			$user_id = $this->user->getId();
@@ -149,7 +149,7 @@ class Chat
 	{
 		include('includes/functions.inc.php');
 		
-		$allowed_funcs = array('image', 'uname', 'name', 'pug', 'pugbomb', 'rev', 'rot13', 'md5', 'sha1', 'l33t');
+		$allowed_funcs = array('image', 'youtube', 'name', 'pug', 'pugbomb', 'rev', 'rot13', 'md5', 'sha1', 'uname', 'uptime', 'l33t');
 		
 		
 		if(in_array($fu, $allowed_funcs) and function_exists($fu))

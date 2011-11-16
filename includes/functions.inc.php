@@ -31,7 +31,13 @@ function rot13($str)
 
 function name()
 {
-	return 'You can <a href="/register">register a nickname/password combo</a> if you want to.';
+	return 'Go <a href="/register">register a nickname/password combo</a>, at least, if you want to.';
+}
+
+function me($msg, $user)
+{
+	return false;
+	//return '* '.$user.' '.$msg;
 }
 
 /**
@@ -72,11 +78,25 @@ function youtube($term)
 	if(empty($term))
 		return false;
 		
-	$res = 'https://gdata.youtube.com/feeds/api/videos?alt=json&orderBy=relevance&q='.urlencode($term);
+	$res = 'https://gdata.youtube.com/feeds/api/videos?alt=json&orderBy=relevance&max-results=8&q='.urlencode($term);
 	$data = json_decode(file_get_contents($res));
-	$url = $data->feed->entry[0]->link[0]->href;
+	$videos = $data->feed->entry;
+	$video = $videos[ mt_rand(0,7) ];
+	if(empty($video))
+		return 'Youtube search for "'.$term.'" didn\'t return any videos.';
 	
-	return $url;
+	foreach($video->link as $link)
+		if($link->rel == 'alternate' and $link->type == 'text/html')
+		{
+			$link = parse_url($link->href);
+			break;
+		}
+	
+	$code = str_replace('&feature=youtube_gdata', '', $link['query']);
+	$code = substr($code, 2);
+	
+	return 'Youtube search for "'.$term.'": '.
+			'<iframe width="560" height="315" src="http://www.youtube.com/embed/'.$code.'" frameborder="0" allowfullscreen></iframe>';
 }
 
 function l33t($text)
@@ -116,6 +136,11 @@ function l33t($text)
 	return $text;
 }
 
+function uptime()
+{
+	return `uptime`;
+}
+
 function servertime()
 {
 	return date('r');
@@ -143,8 +168,8 @@ function pug()
  */
 function pugbomb($count)
 {
-	if($count > 42)
-		$count = 42;
+	if($count > 32)
+		$count = 32;
 	
 	$pugs = json_decode(file_get_contents('http://pugme.herokuapp.com/bomb?count='.$count));
 	$html = '';
