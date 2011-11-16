@@ -69,7 +69,10 @@ elseif($page == 'login' and
 elseif($page == 'logout')
 {
 	$file = 'logout';
-	$c->logoutUser();
+	if($c->logoutUser())
+		$message = 'You are logged out.';
+	else
+		$message = 'You weren\'t even logged in, silly!';
 }
 elseif($page == 'register' and
 		!empty($_POST['username']) and !empty($_POST['password']))

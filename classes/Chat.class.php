@@ -331,9 +331,17 @@ class Chat
 	 */
 	public function logoutUser()
 	{
-		$this->addMessage($this->user->getUsername().' logged out.', 0);
-		$this->user = new User;
-		session_destroy();
+		if($this->user->loggedIn() and $this->user->getUsername() != DEFAULT_USERNAME)
+		{
+			$this->addMessage($this->user->getUsername().' logged out.', 0);
+			$this->user = new User;
+			session_destroy();
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 	
 	/**

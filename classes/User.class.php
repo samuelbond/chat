@@ -12,16 +12,16 @@ class User
 	 * @access public
 	 */
 	protected $user_id = 1;
-	
+
 	/**
 	 * username
 	 * 
-	 * (default value: 'anonymous_coward')
+	 * (default value: DEFAULT_USERNAME)
 	 * 
-	 * @var string
+	 * @var mixed
 	 * @access protected
 	 */
-	protected $username = 'anonymous_coward';
+	protected $username = DEFAULT_USERNAME;
 	
 	/**
 	 * registered
